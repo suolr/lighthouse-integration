@@ -19,7 +19,7 @@
   "author": "Votre Nom",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.2",
+    "@modelcontextprotocol/sdk": "^1.7.2",
     "lighthouse": "^11.0.0",
     "puppeteer": "^21.3.4",
     "puppeteer-core": "^21.3.4",
