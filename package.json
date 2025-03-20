@@ -1,0 +1,33 @@
+{
+  "name": "lighthouse-integration",
+  "version": "1.0.0",
+  "description": "Intégration de Lighthouse avec Puppeteer MCP",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lighthouse",
+    "puppeteer",
+    "mcp",
+    "performance",
+    "web"
+  ],
+  "author": "Votre Nom",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.2",
+    "lighthouse": "^11.0.0",
+    "puppeteer": "^21.3.4",
+    "puppeteer-core": "^21.3.4",
+    "chrome-launcher": "^0.15.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
