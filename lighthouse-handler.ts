@@ -1,7 +1,9 @@
-import * as lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// Correction de l'importation pour Lighthouse
+import lighthouse from 'lighthouse';
 
 // Type pour les options de lighthouse
 export interface LighthouseOptions {
@@ -38,7 +40,7 @@ export class LighthouseHandler {
         logLevel: 'info'
       };
       
-      // Exécuter l'analyse
+      // Exécuter l'analyse - correction de l'appel à lighthouse
       const result = await lighthouse(url, lighthouseConfig);
       
       // Gérer le résultat selon le format demandé
