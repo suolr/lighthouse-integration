@@ -2,12 +2,12 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { 
-  ListToolsMethod, 
-  ListResourcesMethod, 
-  ReadResourceMethod, 
-  CallToolMethod 
-} from "@modelcontextprotocol/sdk/server/methods.js";
+import {
+  CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ListToolsRequestSchema,
+  ReadResourceRequestSchema,
+} from "@modelcontextprotocol/sdk/server/index.js";
 import * as puppeteer from "puppeteer";
 import { LighthouseHandler, LighthouseOptions } from "./lighthouse-handler.js";
 
@@ -216,7 +216,6 @@ const toolDescriptions = [
       required: ["name"],
     },
   },
-  // Autres descriptions d'outils...
   {
     name: `${TOOL_PREFIX}_click`,
     description: "Click an element on the page",
@@ -334,38 +333,34 @@ async function main() {
     // Créer le transport
     const transport = new StdioServerTransport();
     
-    // Créer le serveur avec les informations correctes
-    const server = new Server({
-      name: "lighthouse-integration", 
-      version: "1.0.3",
-      transport
-    });
-    
+    // Créer le serveur
+    // Utilisez la méthode de création de serveur qui fonctionne avec votre version de MCP
+    const server = new Server(transport);
     console.error("Server created");
     
-    // Enregistrer les gestionnaires avec la nouvelle API
-    server.addMethod(ListToolsMethod, () => {
+    // Enregistrer les gestionnaires en utilisant la méthode handle qui existe dans votre version
+    server.handle(ListToolsRequestSchema, () => {
       console.error("Tools requested");
       return {
         tools: toolDescriptions,
       };
     });
     
-    server.addMethod(ListResourcesMethod, () => {
+    server.handle(ListResourcesRequestSchema, () => {
       console.error("Resources requested");
       return {
         resources: [],
       };
     });
     
-    server.addMethod(ReadResourceMethod, async () => {
+    server.handle(ReadResourceRequestSchema, async () => {
       console.error("Resource read requested");
       return {
         content: "",
       };
     });
     
-    server.addMethod(CallToolMethod, async (request: { name: string; parameters: any }) => {
+    server.handle(CallToolRequestSchema, async (request: { name: string; parameters: any }) => {
       console.error(`Tool call requested: ${request.name}`);
       const tool = request.name;
       
@@ -389,9 +384,9 @@ async function main() {
       }
     });
     
-    // Démarrer le serveur
+    // Démarrer le serveur en utilisant la méthode qui existe dans votre version
     console.error("Starting server...");
-    await server.listen();  // Notez le changement de start() à listen()
+    await server.start();
     console.error("Server started successfully");
     
     // Garder le processus actif
