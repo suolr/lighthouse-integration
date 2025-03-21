@@ -9,7 +9,7 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/server/index.js";
 import * as puppeteer from "puppeteer";
-import { LighthouseHandler, LighthouseOptions } from "./lighthouse-handler";
+import { LighthouseHandler, LighthouseOptions } from "./lighthouse-handler.js";
 
 const TOOL_PREFIX = "puppeteer";
 const LIGHTHOUSE_PREFIX = "lighthouse";
@@ -56,7 +56,7 @@ async function getCurrentPage() {
 }
 
 // Outils Puppeteer
-const tools = {
+const tools: Record<string, (args: any) => Promise<any>> = {
   // Outils Puppeteer existants
   [`${TOOL_PREFIX}_navigate`]: async (args: any) => {
     const page = await getCurrentPage();
@@ -327,6 +327,7 @@ const toolDescriptions = [
 // Initialiser le serveur
 async function main() {
   try {
+    console.error("Starting Lighthouse Integration MCP Server...");
     await openBrowser();
     
     // Créer le transport
@@ -334,39 +335,48 @@ async function main() {
     
     // Créer le serveur
     const server = new Server(transport);
+    console.error("Server created");
     
     // Enregistrer les gestionnaires
     server.handle(ListToolsRequestSchema, () => {
+      console.error("Tools requested");
       return {
         tools: toolDescriptions,
       };
     });
     
     server.handle(ListResourcesRequestSchema, () => {
+      console.error("Resources requested");
       return {
         resources: [],
       };
     });
     
     server.handle(ReadResourceRequestSchema, async () => {
+      console.error("Resource read requested");
       return {
         content: "",
       };
     });
     
     server.handle(CallToolRequestSchema, async (request) => {
+      console.error(`Tool call requested: ${request.name}`);
       const tool = request.name;
       
       if (!(tool in tools)) {
+        console.error(`Tool ${tool} not found`);
         return {
           error: `Tool ${tool} not found`,
         };
       }
       
       try {
+        console.error(`Executing tool ${tool}`);
         const result = await tools[tool](request.parameters);
+        console.error(`Tool ${tool} executed successfully`);
         return { result };
       } catch (e: any) {
+        console.error(`Error executing tool ${tool}: ${e.message}`);
         return {
           error: e.message,
         };
@@ -374,17 +384,20 @@ async function main() {
     });
     
     // Démarrer le serveur
+    console.error("Starting server...");
     await server.start();
+    console.error("Server started successfully");
     
     // Garder le processus actif
     process.on("SIGINT", async () => {
+      console.error("SIGINT received, closing browser...");
       if (browser) {
         await browser.close();
       }
       process.exit(0);
     });
   } catch (e) {
-    console.error(e);
+    console.error("Error starting server:", e);
     process.exit(1);
   }
 }
