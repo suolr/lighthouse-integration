@@ -2,12 +2,12 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/server/index.js";
+import { 
+  ListToolsMethod, 
+  ListResourcesMethod, 
+  ReadResourceMethod, 
+  CallToolMethod 
+} from "@modelcontextprotocol/sdk/server/methods.js";
 import * as puppeteer from "puppeteer";
 import { LighthouseHandler, LighthouseOptions } from "./lighthouse-handler.js";
 
@@ -216,6 +216,7 @@ const toolDescriptions = [
       required: ["name"],
     },
   },
+  // Autres descriptions d'outils...
   {
     name: `${TOOL_PREFIX}_click`,
     description: "Click an element on the page",
@@ -333,33 +334,38 @@ async function main() {
     // Créer le transport
     const transport = new StdioServerTransport();
     
-    // Créer le serveur
-    const server = new Server(transport);
+    // Créer le serveur avec les informations correctes
+    const server = new Server({
+      name: "lighthouse-integration", 
+      version: "1.0.3",
+      transport
+    });
+    
     console.error("Server created");
     
-    // Enregistrer les gestionnaires
-    server.handle(ListToolsRequestSchema, () => {
+    // Enregistrer les gestionnaires avec la nouvelle API
+    server.addMethod(ListToolsMethod, () => {
       console.error("Tools requested");
       return {
         tools: toolDescriptions,
       };
     });
     
-    server.handle(ListResourcesRequestSchema, () => {
+    server.addMethod(ListResourcesMethod, () => {
       console.error("Resources requested");
       return {
         resources: [],
       };
     });
     
-    server.handle(ReadResourceRequestSchema, async () => {
+    server.addMethod(ReadResourceMethod, async () => {
       console.error("Resource read requested");
       return {
         content: "",
       };
     });
     
-    server.handle(CallToolRequestSchema, async (request) => {
+    server.addMethod(CallToolMethod, async (request: { name: string; parameters: any }) => {
       console.error(`Tool call requested: ${request.name}`);
       const tool = request.name;
       
@@ -385,7 +391,7 @@ async function main() {
     
     // Démarrer le serveur
     console.error("Starting server...");
-    await server.start();
+    await server.listen();  // Notez le changement de start() à listen()
     console.error("Server started successfully");
     
     // Garder le processus actif
