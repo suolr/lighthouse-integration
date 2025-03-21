@@ -1,13 +1,18 @@
 {
   "name": "lighthouse-integration",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Intégration de Lighthouse avec Puppeteer MCP",
   "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "lighthouse-integration": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "lighthouse",
@@ -19,7 +24,7 @@
   "author": "Votre Nom",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.7.2",
+    "@modelcontextprotocol/sdk": "^1.7.0",
     "lighthouse": "^11.0.0",
     "puppeteer": "^21.3.4",
     "puppeteer-core": "^21.3.4",
@@ -29,5 +34,8 @@
     "@types/node": "^18.11.9",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
-  }
+  },
+  "files": [
+    "dist/**/*"
+  ]
 }
