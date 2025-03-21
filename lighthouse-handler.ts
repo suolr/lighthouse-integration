@@ -2,7 +2,7 @@ import * as chromeLauncher from 'chrome-launcher';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Correction de l'importation pour Lighthouse
+// Importation de lighthouse avec des vérifications de type
 import lighthouse from 'lighthouse';
 
 // Type pour les options de lighthouse
@@ -12,6 +12,12 @@ export interface LighthouseOptions {
   format?: 'html' | 'json' | 'pdf';
   outputPath?: string;
   onlyCategories?: boolean;
+}
+
+// Type pour les résultats lighthouse
+interface LighthouseResult {
+  lhr?: any;
+  report?: string;
 }
 
 // Classe pour gérer les analyses Lighthouse
@@ -40,25 +46,35 @@ export class LighthouseHandler {
         logLevel: 'info'
       };
       
-      // Exécuter l'analyse - correction de l'appel à lighthouse
-      const result = await lighthouse(url, lighthouseConfig);
+      // Exécuter l'analyse avec un type plus spécifique
+      const result = await lighthouse(url, lighthouseConfig) as LighthouseResult;
       
-      // Gérer le résultat selon le format demandé
-      if (outputPath && result.report) {
+      // Vérifier que le résultat est défini avant d'y accéder
+      if (result && outputPath && result.report) {
         const outputFile = path.join(outputPath, `lighthouse-${new Date().toISOString().replace(/:/g, '-')}.${format}`);
-        fs.writeFileSync(outputFile, result.report);
+        
+        // Vérifier le type de report et le convertir en string si nécessaire
+        const reportContent = typeof result.report === 'string' 
+          ? result.report 
+          : Array.isArray(result.report) 
+            ? result.report.join('') 
+            : JSON.stringify(result.report);
+            
+        fs.writeFileSync(outputFile, reportContent);
       }
       
-      // Retourner les résultats
-      if (format === 'json') {
+      // Retourner les résultats avec des vérifications de nullité
+      if (format === 'json' && result && result.lhr) {
         return result.lhr;
-      } else {
+      } else if (result) {
         return {
           success: true,
           format,
           ...(outputPath ? { filePath: outputPath } : {}),
-          report: result.report
+          report: result.report || ''
         };
+      } else {
+        return { success: false, error: "Failed to run Lighthouse" };
       }
     } finally {
       // Toujours fermer Chrome
